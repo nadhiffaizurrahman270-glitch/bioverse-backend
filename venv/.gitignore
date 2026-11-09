@@ -1,0 +1,10 @@
+# Abaikan folder virtual environment & cache
+venv/
+__pycache__/
+
+# Abaikan file environment/API key sensitif
+.env
+
+# Abaikan file konfigurasi IDE/system
+.vscode/
+.DS_Store
