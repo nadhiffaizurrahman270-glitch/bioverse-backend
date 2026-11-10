@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List
@@ -8,12 +9,24 @@ from database import engine, get_db
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
+
+api_key = os.getenv("GOOGLE_API_KEY")
+if not api_key:
+    raise ValueError("GAGAL: File .env tidak terbaca atau variable GOOGLE_API_KEY kosong! Pastikan file bernama '.env' (bukan .env.txt).")
+genai.configure(api_key=api_key)
 
 # Otomatis buat semua tabel di PostgreSQL jika belum ada
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="BioVerse API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"],
+)
 
 # Health Check Endpoint
 @app.get("/api/v1/health")
@@ -80,7 +93,7 @@ def submit_score(score_data: schemas.ScoreSubmit, db: Session = Depends(get_db))
 
 # --- KONFIGURASI GEMINI AI ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=GEMINI_API_KEY)
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 ai_model = genai.GenerativeModel('gemini-3.8-flash')
 
